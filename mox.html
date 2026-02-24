@@ -1,0 +1,1370 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MOX</title>
+<link href="https://fonts.googleapis.com/css2?family=Product+Sans:wght@400;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ══════════════════════════════════════════════
+   THEMES: red-dark, red-light, blue-dark, blue-light, green-dark, green-light
+══════════════════════════════════════════════ */
+:root {
+  --bg:#0c0c0c; --bg2:#141414; --surface:#1a1a1a; --card:#1e1e1e;
+  --border:#2a2a2a; --border-acc:#500000;
+  --acc:#e53935; --acc2:#ff5252; --acc-dim:rgba(229,57,53,.13);
+  --text:#f2f2f2; --text2:#999; --text3:#555;
+  --link:#ff8a80; --visited:#f48fb1;
+  --sh:0 2px 12px rgba(0,0,0,.55);
+  --sbg:#1a1a1a; --sbrd:#333;
+}
+body.light {
+  --bg:#f1f3f4; --bg2:#fff; --surface:#fff; --card:#fff;
+  --border:#dadce0; --border-acc:#ffcdd2;
+  --acc:#d32f2f; --acc2:#e53935; --acc-dim:rgba(211,47,47,.09);
+  --text:#202124; --text2:#5f6368; --text3:#bbb;
+  --link:#c62828; --visited:#7b1fa2;
+  --sh:0 1px 6px rgba(0,0,0,.12);
+  --sbg:#fff; --sbrd:#dfe1e5;
+}
+body.blue-dark {
+  --bg:#060e1c; --bg2:#0b1628; --surface:#0f1e36; --card:#0f2240;
+  --border:#182f52; --border-acc:#0d3a7a;
+  --acc:#1a73e8; --acc2:#4285f4; --acc-dim:rgba(26,115,232,.13);
+  --text:#e8eaed; --text2:#8ab4f8; --text3:#3d5a80;
+  --link:#8ab4f8; --visited:#c58af9;
+  --sh:0 2px 12px rgba(0,0,0,.7);
+  --sbg:#0f1e36; --sbrd:#1e3a5f;
+}
+body.blue-light {
+  --bg:#f8f9fa; --bg2:#fff; --surface:#fff; --card:#fff;
+  --border:#dadce0; --border-acc:#c5cae9;
+  --acc:#1a73e8; --acc2:#4285f4; --acc-dim:rgba(26,115,232,.09);
+  --text:#202124; --text2:#5f6368; --text3:#bbb;
+  --link:#1a73e8; --visited:#7b1fa2;
+  --sh:0 1px 6px rgba(0,0,0,.12);
+  --sbg:#fff; --sbrd:#dfe1e5;
+}
+body.green-dark {
+  --bg:#040e06; --bg2:#071409; --surface:#0a1e0d; --card:#0d2410;
+  --border:#163520; --border-acc:#0d4a18;
+  --acc:#2e7d32; --acc2:#43a047; --acc-dim:rgba(46,125,50,.13);
+  --text:#e8f5e9; --text2:#81c784; --text3:#2e5435;
+  --link:#a5d6a7; --visited:#ce93d8;
+  --sh:0 2px 12px rgba(0,0,0,.7);
+  --sbg:#0a1e0d; --sbrd:#1a4025;
+}
+body.green-light {
+  --bg:#f1f8f2; --bg2:#fff; --surface:#fff; --card:#fff;
+  --border:#c8e6c9; --border-acc:#a5d6a7;
+  --acc:#2e7d32; --acc2:#43a047; --acc-dim:rgba(46,125,50,.09);
+  --text:#1b2e1c; --text2:#4a6e4d; --text3:#bbb;
+  --link:#2e7d32; --visited:#7b1fa2;
+  --sh:0 1px 6px rgba(0,0,0,.12);
+  --sbg:#fff; --sbrd:#c8e6c9;
+}
+
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'Roboto',sans-serif;min-height:100vh;transition:background .3s,color .3s;}
+a{color:var(--link);text-decoration:none;}
+button{cursor:pointer;font-family:inherit;}
+input,select,textarea{font-family:inherit;}
+
+/* ══ TAB SYSTEM ══ */
+#tab-bar-outer {
+  display:flex;
+  background:var(--bg2);
+  border-bottom:1px solid var(--border);
+  position:sticky;top:0;z-index:600;
+  box-shadow:var(--sh);
+  overflow:hidden;
+}
+#browser-tabs {
+  display:flex;align-items:flex-end;
+  padding:8px 8px 0;
+  gap:2px;
+  overflow-x:auto;
+  scrollbar-width:none;
+  flex:1;
+}
+#browser-tabs::-webkit-scrollbar{display:none;}
+.btab {
+  display:flex;align-items:center;gap:8px;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-bottom:none;
+  border-radius:10px 10px 0 0;
+  padding:8px 14px;
+  min-width:140px;max-width:200px;
+  cursor:pointer;
+  font-size:0.8rem;color:var(--text2);
+  transition:background .2s,color .2s;
+  position:relative;
+  flex-shrink:0;
+}
+.btab.active {
+  background:var(--bg);
+  color:var(--text);
+  border-bottom-color:var(--bg);
+  z-index:2;
+}
+.btab-favicon{width:14px;height:14px;flex-shrink:0;border-radius:2px;}
+.btab-title{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px;}
+.btab-close {
+  background:none;border:none;color:var(--text3);
+  font-size:0.9rem;padding:2px 4px;border-radius:4px;
+  transition:all .2s;line-height:1;flex-shrink:0;
+}
+.btab-close:hover{background:var(--acc-dim);color:var(--acc);}
+.new-tab-btn {
+  background:none;border:none;color:var(--text2);
+  font-size:1.2rem;padding:8px 12px;
+  transition:color .2s;align-self:center;flex-shrink:0;
+}
+.new-tab-btn:hover{color:var(--acc);}
+
+/* ══ ADDRESS BAR (Google-style) ══ */
+#address-bar {
+  display:flex;align-items:center;gap:10px;
+  padding:10px 16px;
+  background:var(--bg2);
+  border-bottom:1px solid var(--border);
+  position:sticky;top:52px;z-index:590;
+}
+.nav-btn {
+  background:none;border:none;color:var(--text2);
+  font-size:1rem;width:32px;height:32px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .2s;flex-shrink:0;
+}
+.nav-btn:hover{background:var(--acc-dim);color:var(--acc);}
+.nav-btn:disabled{opacity:.3;cursor:default;}
+.omnibar-wrap {
+  flex:1;display:flex;align-items:center;
+  background:var(--sbg);
+  border:1.5px solid var(--sbrd);
+  border-radius:24px;
+  padding:0 16px;
+  height:40px;
+  transition:border-color .2s,box-shadow .2s;
+  box-shadow:var(--sh);
+  max-width:720px;
+}
+.omnibar-wrap:focus-within {
+  border-color:var(--acc);
+  box-shadow:0 0 0 3px var(--acc-dim);
+}
+.omni-search-icon{font-size:.95rem;color:var(--text3);margin-right:10px;flex-shrink:0;}
+#omni-input {
+  flex:1;background:none;border:none;outline:none;
+  color:var(--text);font-size:.95rem;caret-color:var(--acc);
+}
+#omni-input::placeholder{color:var(--text3);}
+#omni-clear {
+  background:none;border:none;color:var(--text3);
+  font-size:1rem;display:none;padding:2px 6px;transition:color .2s;
+}
+#omni-clear:hover{color:var(--acc);}
+.search-submit-btn {
+  background:var(--acc);border:none;border-radius:20px;
+  color:#fff;font-size:.82rem;font-weight:500;
+  padding:8px 16px;transition:all .2s;flex-shrink:0;
+}
+.search-submit-btn:hover{filter:brightness(1.1);}
+.addr-right{display:flex;align-items:center;gap:6px;flex-shrink:0;}
+.icon-btn {
+  background:none;border:none;color:var(--text2);
+  font-size:1rem;width:34px;height:34px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .2s;
+}
+.icon-btn:hover{background:var(--acc-dim);color:var(--acc);}
+
+/* ══ PAGE CONTENT ══ */
+#page-stack{}
+.page-view {display:none; min-height:calc(100vh - 105px);}
+.page-view.active {display:block;}
+
+/* ══ HOME PAGE ══ */
+#home-page {
+  display:flex;flex-direction:column;align-items:center;
+  padding:72px 24px 60px;
+}
+.home-logo {
+  font-family:'Roboto',sans-serif;
+  font-size:4.5rem;font-weight:700;letter-spacing:-3px;
+  color:var(--acc);margin-bottom:32px;
+  text-shadow:0 0 60px var(--acc-dim);
+  animation:fdu .5s ease both;
+}
+.home-omni {
+  width:100%;max-width:580px;
+  display:flex;align-items:center;
+  background:var(--sbg);
+  border:1.5px solid var(--sbrd);
+  border-radius:28px;
+  padding:0 20px;height:52px;
+  box-shadow:0 2px 14px rgba(0,0,0,.18);
+  transition:box-shadow .2s,border-color .2s;
+  animation:fdu .5s .06s ease both;
+}
+.home-omni:focus-within {
+  border-color:var(--acc);
+  box-shadow:0 0 0 3px var(--acc-dim),0 4px 20px rgba(0,0,0,.2);
+}
+.home-omni input {
+  flex:1;background:none;border:none;outline:none;
+  color:var(--text);font-size:1.05rem;caret-color:var(--acc);
+}
+.home-omni input::placeholder{color:var(--text3);}
+.home-search-btn {
+  background:var(--acc);border:none;border-radius:22px;
+  color:#fff;font-size:.85rem;font-weight:500;
+  padding:10px 20px;transition:all .2s;white-space:nowrap;
+}
+.home-search-btn:hover{filter:brightness(1.1);}
+.home-chips {
+  display:flex;gap:8px;flex-wrap:wrap;justify-content:center;
+  margin-top:20px;max-width:580px;
+  animation:fdu .5s .1s ease both;
+}
+.chip {
+  background:var(--surface);border:1px solid var(--border);
+  color:var(--text2);font-size:.79rem;
+  padding:7px 16px;border-radius:20px;cursor:pointer;
+  transition:all .2s;
+}
+.chip:hover{border-color:var(--acc);color:var(--acc);background:var(--acc-dim);}
+.home-tools-grid {
+  display:grid;grid-template-columns:repeat(3,1fr);gap:12px;
+  margin-top:40px;max-width:560px;width:100%;
+  animation:fdu .5s .14s ease both;
+}
+.tool-tile {
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:14px;padding:18px 12px;
+  cursor:pointer;transition:all .2s;text-align:center;
+}
+.tool-tile:hover{border-color:var(--acc);background:var(--acc-dim);}
+.tool-tile .ti{font-size:1.8rem;margin-bottom:6px;}
+.tool-tile .tl{font-size:.76rem;font-weight:500;color:var(--text2);}
+
+/* ══ RESULTS PAGE ══ */
+.results-page {padding:20px 24px 60px;max-width:900px;}
+.results-meta {font-size:.82rem;color:var(--text3);margin-bottom:20px;}
+.results-meta b{color:var(--acc);}
+
+/* Filter pills */
+.filter-row {
+  display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px;
+}
+.fpill {
+  background:var(--surface);border:1px solid var(--border);
+  color:var(--text2);font-size:.78rem;
+  padding:6px 14px;border-radius:16px;cursor:pointer;
+  transition:all .2s;white-space:nowrap;
+}
+.fpill:hover,.fpill.on{border-color:var(--acc);color:var(--acc);background:var(--acc-dim);}
+
+/* Answer box */
+.answer-box {
+  background:var(--surface);border:1px solid var(--border);
+  border-left:3px solid var(--acc);border-radius:12px;
+  padding:18px 20px;margin-bottom:22px;
+  animation:fdu .3s ease both;
+}
+.ab-tag {
+  font-size:.68rem;font-weight:500;color:var(--acc);
+  letter-spacing:.5px;text-transform:uppercase;margin-bottom:8px;
+  display:flex;align-items:center;gap:6px;
+}
+.ab-body{font-size:.93rem;line-height:1.7;color:var(--text);}
+.ab-src{font-size:.75rem;color:var(--text3);margin-top:10px;}
+.ab-src a{color:var(--acc);cursor:pointer;}
+
+/* Web result */
+.result-item {
+  margin-bottom:24px;padding:4px 0;
+  animation:fdu .25s ease both;
+}
+.result-top {display:flex;align-items:center;gap:8px;margin-bottom:3px;}
+.rfav {width:16px;height:16px;border-radius:3px;object-fit:contain;flex-shrink:0;}
+.rdomain {font-size:.8rem;color:var(--text2);}
+.rbread {font-size:.8rem;color:var(--text3);}
+.rtitle {
+  font-size:1.1rem;color:var(--link);font-weight:400;
+  margin-bottom:4px;line-height:1.35;cursor:pointer;
+  transition:text-decoration .1s;
+}
+.result-item:hover .rtitle{text-decoration:underline;}
+.rsnip{font-size:.87rem;color:var(--text2);line-height:1.65;}
+.rsnip mark{background:var(--acc-dim);color:var(--text);border-radius:2px;padding:0 2px;}
+
+/* Sitelinks (like Google's extra links under first result) */
+.sitelinks {
+  display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;
+}
+.sitelink {
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:8px;padding:8px 12px;cursor:pointer;
+  transition:border-color .2s;
+}
+.sitelink:hover{border-color:var(--acc);}
+.sl-title{font-size:.82rem;color:var(--link);font-weight:500;margin-bottom:2px;}
+.sl-desc{font-size:.74rem;color:var(--text3);}
+
+/* Info panel (right side) */
+.info-float {
+  float:right;margin:0 0 20px 24px;
+  width:290px;background:var(--surface);border:1px solid var(--border);
+  border-radius:12px;overflow:hidden;
+  animation:fdu .3s ease both;
+}
+.info-float img{width:100%;height:160px;object-fit:cover;display:block;}
+.info-float .ib{padding:14px 16px;}
+.info-float .ib-title{font-size:1rem;font-weight:700;margin-bottom:6px;}
+.info-float .ib-desc{font-size:.82rem;color:var(--text2);line-height:1.6;}
+.info-float .ib-link{
+  display:inline-block;margin-top:10px;font-size:.78rem;
+  color:var(--acc);cursor:pointer;
+}
+.info-float .ib-link:hover{text-decoration:underline;}
+.clearfix::after{content:'';display:table;clear:both;}
+
+/* ══ NEWS ══ */
+.news-item {
+  display:flex;gap:14px;align-items:flex-start;
+  padding:14px 0;border-bottom:1px solid var(--border);
+  cursor:pointer;animation:fdu .25s ease both;
+}
+.news-item:last-child{border-bottom:none;}
+.ni-body{flex:1;}
+.ni-src{font-size:.74rem;color:var(--text3);margin-bottom:3px;display:flex;align-items:center;gap:5px;}
+.ni-src b{color:var(--text2);}
+.ni-title{font-size:.95rem;color:var(--link);line-height:1.4;margin-bottom:3px;font-weight:400;}
+.news-item:hover .ni-title{text-decoration:underline;}
+.ni-time{font-size:.73rem;color:var(--text3);}
+.ni-img{width:84px;height:66px;border-radius:8px;object-fit:cover;flex-shrink:0;background:var(--card);display:flex;align-items:center;justify-content:center;font-size:1.6rem;}
+
+/* ══ CALCULATOR ══ */
+.calc-wrap{max-width:320px;animation:fdu .3s ease both;}
+.calc-disp{
+  background:var(--bg);border:1px solid var(--border);
+  border-radius:14px;padding:16px 20px;margin-bottom:10px;text-align:right;
+}
+.calc-hist{font-size:.8rem;color:var(--text3);min-height:20px;font-family:monospace;}
+.calc-num{font-size:2.4rem;color:var(--text);font-weight:300;font-family:'Roboto',sans-serif;}
+.cg{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+.cb{
+  aspect-ratio:1;background:var(--surface);border:1px solid var(--border);
+  border-radius:50%;color:var(--text);font-size:1rem;
+  transition:all .15s;
+}
+.cb:hover{background:var(--acc-dim);border-color:var(--acc);}
+.cb.op{color:var(--acc);font-weight:500;}
+.cb.fn{background:var(--card);font-size:.88rem;color:var(--text2);}
+.cb.zero{border-radius:28px;grid-column:span 2;aspect-ratio:auto;padding:0 28px;text-align:left;}
+.cb.eq{background:var(--acc);color:#fff;border:none;}
+.cb.eq:hover{filter:brightness(1.1);}
+
+/* ══ WEATHER ══ */
+.weather-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:16px;padding:24px;max-width:420px;
+  animation:fdu .3s ease both;
+}
+.wc-city{font-size:1rem;color:var(--text2);margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+.wc-main{display:flex;align-items:center;gap:20px;margin-bottom:20px;}
+.wc-temp{font-size:3.8rem;font-weight:300;color:var(--text);}
+.wc-right .wc-icon{font-size:3.5rem;}
+.wc-desc{font-size:.9rem;color:var(--text2);margin-top:4px;}
+.wc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding-top:16px;border-top:1px solid var(--border);}
+.wc-item .wl{font-size:.68rem;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;}
+.wc-item .wv{font-size:.9rem;font-weight:500;}
+
+/* ══ CURRENCY ══ */
+.cur-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;max-width:480px;animation:fdu .3s ease both;}
+.cur-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:16px;}
+.cur-num{background:var(--bg);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:1.05rem;font-weight:500;padding:12px 14px;width:100px;outline:none;transition:border-color .2s;}
+.cur-num:focus{border-color:var(--acc);}
+.cur-sel{background:var(--bg);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:.85rem;padding:12px 12px;outline:none;cursor:pointer;flex:1;min-width:120px;transition:border-color .2s;}
+.cur-sel:focus{border-color:var(--acc);}
+.cur-sw{background:var(--acc-dim);border:1px solid var(--border);border-radius:50%;color:var(--acc);width:38px;height:38px;display:flex;align-items:center;justify-content:center;font-size:1.05rem;transition:all .2s;flex-shrink:0;}
+.cur-sw:hover{background:var(--acc);color:#fff;}
+.cur-go{background:var(--acc);border:none;border-radius:10px;color:#fff;font-size:.85rem;font-weight:500;padding:12px 18px;transition:all .2s;}
+.cur-go:hover{filter:brightness(1.1);}
+.cur-res{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center;}
+.cur-res-main{font-size:1.7rem;color:var(--acc);margin-bottom:5px;}
+.cur-res-rate{font-size:.74rem;color:var(--text3);}
+
+/* ══ TRANSLATOR ══ */
+.trans-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;max-width:680px;animation:fdu .3s ease both;}
+.trans-header{display:flex;align-items:center;border-bottom:1px solid var(--border);background:var(--card);padding:0 16px;}
+.ts{background:none;border:none;color:var(--text);font-size:.88rem;font-weight:500;padding:14px 10px;outline:none;cursor:pointer;flex:1;}
+.tsw{background:none;border:none;color:var(--acc);font-size:1.05rem;padding:0 10px;transition:transform .3s;}
+.tsw:hover{transform:rotate(180deg);}
+.trans-body{display:grid;grid-template-columns:1fr 1fr;}
+.tp{padding:16px 18px;min-height:120px;position:relative;}
+.tp:first-child{border-right:1px solid var(--border);}
+.tp textarea{width:100%;background:none;border:none;outline:none;resize:none;color:var(--text);font-size:.97rem;line-height:1.6;min-height:90px;}
+.tp textarea::placeholder{color:var(--text3);}
+.tp-out{font-size:.97rem;line-height:1.6;color:var(--text);min-height:90px;}
+.tp-out.ph{color:var(--text3);font-style:italic;}
+.trans-foot{border-top:1px solid var(--border);padding:12px 16px;display:flex;justify-content:flex-end;}
+.trans-btn{background:var(--acc);border:none;border-radius:8px;color:#fff;font-size:.84rem;font-weight:500;padding:10px 20px;transition:all .2s;}
+.trans-btn:hover{filter:brightness(1.1);}
+
+/* ══ INLINE PAGE VIEWER (iframe) ══ */
+.viewer-page {
+  display:none;
+  flex-direction:column;
+  height:calc(100vh - 105px);
+  background:var(--bg2);
+}
+.viewer-page.active{display:flex;}
+.viewer-toolbar {
+  display:flex;align-items:center;gap:8px;
+  padding:8px 14px;
+  background:var(--surface);
+  border-bottom:1px solid var(--border);
+  flex-shrink:0;
+}
+.viewer-url {
+  flex:1;background:var(--bg);border:1px solid var(--border);
+  border-radius:20px;padding:6px 14px;
+  font-size:.82rem;color:var(--text2);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.vbtn{
+  background:none;border:none;color:var(--text2);
+  font-size:.85rem;padding:6px 10px;border-radius:8px;
+  transition:all .2s;white-space:nowrap;
+}
+.vbtn:hover{background:var(--acc-dim);color:var(--acc);}
+.vbtn.primary{background:var(--acc);color:#fff;border-radius:16px;padding:6px 14px;}
+.vbtn.primary:hover{filter:brightness(1.1);}
+.viewer-iframe{flex:1;border:none;width:100%;background:#fff;}
+.viewer-blocked{
+  display:none;flex-direction:column;align-items:center;
+  justify-content:center;flex:1;gap:16px;
+  padding:32px;text-align:center;
+}
+.viewer-blocked .vb-icon{font-size:3rem;}
+.viewer-blocked p{font-size:.9rem;color:var(--text2);line-height:1.7;max-width:400px;}
+.viewer-blocked .vb-open{
+  background:var(--acc);color:#fff;border:none;border-radius:24px;
+  padding:12px 28px;font-size:.88rem;font-weight:500;cursor:pointer;
+  transition:all .2s;
+}
+.viewer-blocked .vb-open:hover{filter:brightness(1.1);}
+
+/* ══ SETTINGS MODAL ══ */
+#modal-bg{display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.55);backdrop-filter:blur(3px);}
+#modal-bg.open{display:flex;align-items:center;justify-content:center;}
+#modal{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:28px;max-width:460px;width:93%;animation:fdu .25s ease both;max-height:85vh;overflow-y:auto;}
+.mt{font-size:1.1rem;font-weight:500;margin-bottom:22px;display:flex;justify-content:space-between;align-items:center;}
+.mc{background:none;border:none;color:var(--text2);font-size:1.25rem;transition:color .2s;}
+.mc:hover{color:var(--acc);}
+.ms{margin-bottom:22px;}
+.ms-title{font-size:.73rem;font-weight:500;color:var(--text3);letter-spacing:.8px;text-transform:uppercase;margin-bottom:12px;}
+.theme-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.th-block{border:2px solid var(--border);border-radius:12px;padding:12px 8px;cursor:pointer;transition:border-color .2s;text-align:center;}
+.th-block:hover,.th-block.sel{border-color:var(--acc);}
+.th-block.sel{background:var(--acc-dim);}
+.th-name{font-size:.76rem;font-weight:500;color:var(--text2);margin-bottom:10px;}
+.th-dots{display:flex;justify-content:center;gap:5px;margin-bottom:10px;}
+.th-dot{width:16px;height:16px;border-radius:50%;}
+.mode-pills{display:flex;gap:5px;justify-content:center;}
+.mpill{background:var(--surface);border:1px solid var(--border);border-radius:8px;font-size:.68rem;color:var(--text2);padding:4px 8px;cursor:pointer;transition:all .2s;}
+.mpill:hover,.mpill.on{border-color:var(--acc);color:var(--acc);background:var(--acc-dim);}
+.lang-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.lg-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;color:var(--text2);font-size:.82rem;padding:10px;transition:all .2s;text-align:center;}
+.lg-btn:hover,.lg-btn.on{border-color:var(--acc);color:var(--acc);background:var(--acc-dim);}
+
+/* ══ UTILS ══ */
+.spin{width:30px;height:30px;border:3px solid var(--border);border-top-color:var(--acc);border-radius:50%;animation:spin .7s linear infinite;}
+.loading{display:flex;align-items:center;justify-content:center;padding:60px;gap:14px;color:var(--text3);font-size:.85rem;}
+.empty-state{text-align:center;padding:60px 20px;color:var(--text3);}
+.empty-state p{font-size:.88rem;line-height:1.8;margin-top:10px;}
+@keyframes fdu{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ══ RESPONSIVE ══ */
+@media(max-width:640px){
+  .results-page{padding:14px 14px 50px;}
+  .trans-body{grid-template-columns:1fr;}
+  .tp:first-child{border-right:none;border-bottom:1px solid var(--border);}
+  .info-float{float:none;width:100%;margin:0 0 16px;}
+  #address-bar{padding:8px 10px;}
+  .home-tools-grid{grid-template-columns:repeat(2,1fr);}
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════ BROWSER TABS BAR ══════════ -->
+<div id="tab-bar-outer">
+  <div id="browser-tabs"></div>
+  <button class="new-tab-btn" onclick="newTab()" title="Nueva pestaña">＋</button>
+</div>
+
+<!-- ══════════ ADDRESS BAR ══════════ -->
+<div id="address-bar">
+  <button class="nav-btn" id="btn-back" onclick="goBack()" title="Atrás" disabled>←</button>
+  <button class="nav-btn" id="btn-fwd" onclick="goFwd()" title="Adelante" disabled>→</button>
+  <button class="nav-btn" id="btn-reload" onclick="reload()" title="Recargar">↻</button>
+  <div class="omnibar-wrap">
+    <span class="omni-search-icon">🔍</span>
+    <input type="text" id="omni-input" placeholder="Buscar o escribir URL en MOX..." autocomplete="off" spellcheck="false">
+    <button id="omni-clear" onclick="clearOmni()">✕</button>
+  </div>
+  <button class="search-submit-btn" onclick="omniSearch()">Buscar</button>
+  <div class="addr-right">
+    <select id="lang-sel" class="icon-btn" style="border-radius:8px;font-size:.72rem;padding:6px 8px;width:auto;border:1px solid var(--border);background:var(--surface);color:var(--text2);" onchange="setLang(this.value)">
+      <option value="es">🌎 ES</option>
+      <option value="en">🇺🇸 EN</option>
+      <option value="pt">🇧🇷 PT</option>
+      <option value="fr">🇫🇷 FR</option>
+      <option value="de">🇩🇪 DE</option>
+      <option value="it">🇮🇹 IT</option>
+    </select>
+    <button class="icon-btn" onclick="openModal()" title="Personalizar">⚙️</button>
+  </div>
+</div>
+
+<!-- ══════════ PAGE STACK ══════════ -->
+<div id="page-stack"></div>
+
+<!-- ══════════ SETTINGS MODAL ══════════ -->
+<div id="modal-bg">
+  <div id="modal">
+    <div class="mt">
+      <span>Personalización</span>
+      <button class="mc" onclick="closeModal()">✕</button>
+    </div>
+    <div class="ms">
+      <div class="ms-title">Tema de color</div>
+      <div class="theme-grid">
+        <div class="th-block sel" data-base="red" onclick="pickThemeBlock(this,'red')">
+          <div class="th-name">Rojo</div>
+          <div class="th-dots"><div class="th-dot" style="background:#e53935"></div><div class="th-dot" style="background:#0c0c0c"></div></div>
+          <div class="mode-pills">
+            <button class="mpill on" data-m="dark" onclick="pickMode(event,'red','dark')">🌙</button>
+            <button class="mpill" data-m="light" onclick="pickMode(event,'red','light')">☀️</button>
+          </div>
+        </div>
+        <div class="th-block" data-base="blue" onclick="pickThemeBlock(this,'blue')">
+          <div class="th-name">Azul</div>
+          <div class="th-dots"><div class="th-dot" style="background:#1a73e8"></div><div class="th-dot" style="background:#060e1c"></div></div>
+          <div class="mode-pills">
+            <button class="mpill on" data-m="dark" onclick="pickMode(event,'blue','dark')">🌙</button>
+            <button class="mpill" data-m="light" onclick="pickMode(event,'blue','light')">☀️</button>
+          </div>
+        </div>
+        <div class="th-block" data-base="green" onclick="pickThemeBlock(this,'green')">
+          <div class="th-name">Verde</div>
+          <div class="th-dots"><div class="th-dot" style="background:#2e7d32"></div><div class="th-dot" style="background:#040e06"></div></div>
+          <div class="mode-pills">
+            <button class="mpill on" data-m="dark" onclick="pickMode(event,'green','dark')">🌙</button>
+            <button class="mpill" data-m="light" onclick="pickMode(event,'green','light')">☀️</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="ms">
+      <div class="ms-title">Idioma</div>
+      <div class="lang-grid">
+        <button class="lg-btn on" onclick="setLangUI('es',this)">🌎 Español</button>
+        <button class="lg-btn" onclick="setLangUI('en',this)">🇺🇸 English</button>
+        <button class="lg-btn" onclick="setLangUI('pt',this)">🇧🇷 Português</button>
+        <button class="lg-btn" onclick="setLangUI('fr',this)">🇫🇷 Français</button>
+        <button class="lg-btn" onclick="setLangUI('de',this)">🇩🇪 Deutsch</button>
+        <button class="lg-btn" onclick="setLangUI('it',this)">🇮🇹 Italiano</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════════════════
+   MOX — Browser-style search engine
+   • Multi-tab system (open links in new tabs INSIDE MOX)
+   • Real search results via DuckDuckGo + rich fallback
+   • Iframe viewer for pages (with graceful blocked-page fallback)
+   • Weather, Currency, Calculator, Translator
+   • 6 themes (3 colors × dark/light)
+   • Multi-language UI
+══════════════════════════════════════════════════════════ */
+
+/* ─── STATE ─── */
+const APP = {
+  lang: 'es',
+  themeBase: 'red',
+  themeMode: 'dark',
+  tabs: [],      // [{id, type:'home'|'results'|'viewer', title, query, url, el}]
+  activeTab: null,
+  tabCounter: 0,
+};
+
+/* ─── I18N ─── */
+const I18N = {
+  es:{
+    search_ph:'Buscar o escribir URL en MOX...',
+    home_ph:'¿Qué quieres buscar hoy?',
+    results_for:'Resultados para',
+    answer:'RESPUESTA DIRECTA',
+    src:'Fuente',
+    news_hdr:'Últimas noticias',
+    calc:'Calculadora',weather:'Clima',currency:'Divisas',translate:'Traducir',
+    news:'Noticias',settings:'Ajustes',
+    humidity:'Humedad',wind:'Viento',feels:'Sensación',
+    convert:'Convertir',translate_btn:'Traducir',
+    blocked_title:'Página no disponible en vista previa',
+    blocked_desc:'Este sitio no permite ser incrustado por políticas de seguridad (X-Frame-Options). Puedes abrirlo en una nueva pestaña.',
+    open_ext:'Abrir en el navegador ↗',
+    filters:['Todo','Noticias','Imágenes','Videos','Compras','Mapas'],
+    chips:['Inteligencia Artificial','Noticias México','JavaScript','Bitcoin precio','Clima CDMX','Recetas fáciles','Películas 2024','Fútbol hoy','Ropa Nike','Amazon ofertas'],
+    tools:['🧮 Calculadora','🌤️ Clima','💱 Divisas','🌐 Traducir','📰 Noticias'],
+  },
+  en:{
+    search_ph:'Search or type URL in MOX...',
+    home_ph:'What are you looking for?',
+    results_for:'Results for',
+    answer:'DIRECT ANSWER',
+    src:'Source',
+    news_hdr:'Latest news',
+    calc:'Calculator',weather:'Weather',currency:'Currency',translate:'Translate',
+    news:'News',settings:'Settings',
+    humidity:'Humidity',wind:'Wind',feels:'Feels like',
+    convert:'Convert',translate_btn:'Translate',
+    blocked_title:'Page not available in preview',
+    blocked_desc:'This site does not allow embedding (X-Frame-Options). You can open it in a new tab.',
+    open_ext:'Open in browser ↗',
+    filters:['All','News','Images','Videos','Shopping','Maps'],
+    chips:['Artificial Intelligence','Breaking News','JavaScript','Bitcoin price','Weather NYC','Easy Recipes','Movies 2024','Soccer today','Nike shoes','Amazon deals'],
+    tools:['🧮 Calculator','🌤️ Weather','💱 Currency','🌐 Translate','📰 News'],
+  },
+  pt:{search_ph:'Pesquisar no MOX...',home_ph:'O que você quer buscar?',results_for:'Resultados para',answer:'RESPOSTA DIRETA',src:'Fonte',news_hdr:'Últimas notícias',calc:'Calculadora',weather:'Clima',currency:'Moedas',translate:'Traduzir',news:'Notícias',settings:'Config.',humidity:'Umidade',wind:'Vento',feels:'Sensação',convert:'Converter',translate_btn:'Traduzir',blocked_title:'Página indisponível',blocked_desc:'Este site não permite incorporação.',open_ext:'Abrir no navegador ↗',filters:['Tudo','Notícias','Imagens','Vídeos','Compras','Mapas'],chips:['Inteligência Artificial','Notícias Brasil','JavaScript','Bitcoin','Clima Rio','Receitas','Filmes 2024'],tools:['🧮 Calculadora','🌤️ Clima','💱 Moedas','🌐 Traduzir','📰 Notícias']},
+  fr:{search_ph:'Rechercher dans MOX...',home_ph:'Que cherchez-vous ?',results_for:'Résultats pour',answer:'RÉPONSE DIRECTE',src:'Source',news_hdr:'Dernières actualités',calc:'Calculatrice',weather:'Météo',currency:'Devises',translate:'Traduire',news:'Actualités',settings:'Paramètres',humidity:'Humidité',wind:'Vent',feels:'Ressenti',convert:'Convertir',translate_btn:'Traduire',blocked_title:'Page non disponible',blocked_desc:'Ce site ne permet pas l\'incorporation.',open_ext:'Ouvrir dans le navigateur ↗',filters:['Tout','Actualités','Images','Vidéos','Shopping','Cartes'],chips:['Intelligence artificielle','Actualités France','JavaScript','Bitcoin','Météo Paris','Recettes','Films 2024'],tools:['🧮 Calculatrice','🌤️ Météo','💱 Devises','🌐 Traduire','📰 Actualités']},
+  de:{search_ph:'In MOX suchen...',home_ph:'Was suchen Sie?',results_for:'Ergebnisse für',answer:'DIREKTE ANTWORT',src:'Quelle',news_hdr:'Neueste Nachrichten',calc:'Rechner',weather:'Wetter',currency:'Währung',translate:'Übersetzen',news:'Nachrichten',settings:'Einstellungen',humidity:'Luftfeuchte',wind:'Wind',feels:'Gefühlt',convert:'Umrechnen',translate_btn:'Übersetzen',blocked_title:'Seite nicht verfügbar',blocked_desc:'Diese Seite erlaubt keine Einbettung.',open_ext:'Im Browser öffnen ↗',filters:['Alles','Nachrichten','Bilder','Videos','Shopping','Karten'],chips:['Künstliche Intelligenz','Deutschland Nachrichten','JavaScript','Bitcoin','Wetter Berlin','Rezepte','Filme 2024'],tools:['🧮 Rechner','🌤️ Wetter','💱 Währung','🌐 Übersetzen','📰 Nachrichten']},
+  it:{search_ph:'Cerca in MOX...',home_ph:'Cosa stai cercando?',results_for:'Risultati per',answer:'RISPOSTA DIRETTA',src:'Fonte',news_hdr:'Ultime notizie',calc:'Calcolatrice',weather:'Meteo',currency:'Valute',translate:'Tradurre',news:'Notizie',settings:'Impostazioni',humidity:'Umidità',wind:'Vento',feels:'Percepito',convert:'Converti',translate_btn:'Traduci',blocked_title:'Pagina non disponibile',blocked_desc:'Questo sito non permette l\'incorporazione.',open_ext:'Apri nel browser ↗',filters:['Tutto','Notizie','Immagini','Video','Shopping','Mappe'],chips:['Intelligenza Artificiale','Notizie Italia','JavaScript','Bitcoin','Meteo Roma','Ricette','Film 2024'],tools:['🧮 Calcolatrice','🌤️ Meteo','💱 Valute','🌐 Tradurre','📰 Notizie']},
+};
+const T = k => (I18N[APP.lang]||I18N.es)[k] || k;
+
+/* ─── THEME ─── */
+function applyTheme() {
+  const cls = APP.themeBase === 'red'
+    ? (APP.themeMode === 'light' ? 'light' : '')
+    : (APP.themeMode === 'light' ? `${APP.themeBase}-light` : `${APP.themeBase}-dark`);
+  document.body.className = cls;
+  localStorage.setItem('mox-theme', `${APP.themeBase}-${APP.themeMode}`);
+}
+function pickThemeBlock(el, base) {
+  document.querySelectorAll('.th-block').forEach(b => b.classList.remove('sel'));
+  el.classList.add('sel');
+  APP.themeBase = base;
+  applyTheme();
+}
+function pickMode(e, base, mode) {
+  e.stopPropagation();
+  const block = e.target.closest('.th-block');
+  block.querySelectorAll('.mpill').forEach(p => p.classList.remove('on'));
+  e.target.classList.add('on');
+  APP.themeBase = base; APP.themeMode = mode;
+  document.querySelectorAll('.th-block').forEach(b => b.classList.toggle('sel', b.dataset.base === base));
+  applyTheme();
+}
+function openModal() { document.getElementById('modal-bg').classList.add('open'); }
+function closeModal() { document.getElementById('modal-bg').classList.remove('open'); }
+document.getElementById('modal-bg').addEventListener('click', e => { if (e.target === document.getElementById('modal-bg')) closeModal(); });
+
+/* ─── LANG ─── */
+function setLang(l) {
+  APP.lang = l;
+  document.getElementById('lang-sel').value = l;
+  document.getElementById('omni-input').placeholder = T('search_ph');
+}
+function setLangUI(l, btn) {
+  document.querySelectorAll('.lg-btn').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  setLang(l);
+}
+
+/* ──────────────────────────────────────────────
+   TAB SYSTEM
+──────────────────────────────────────────────── */
+function newTab(type='home', opts={}) {
+  const id = ++APP.tabCounter;
+  // Create DOM element for tab
+  const tabEl = document.createElement('div');
+  tabEl.className = 'btab';
+  tabEl.dataset.id = id;
+  tabEl.innerHTML = `
+    <img class="btab-favicon" src="" alt="" style="display:none">
+    <span class="btab-title">Nueva pestaña</span>
+    <button class="btab-close" onclick="closeTab(${id},event)">✕</button>`;
+  tabEl.addEventListener('click', e => { if (!e.target.classList.contains('btab-close')) activateTab(id); });
+  document.getElementById('browser-tabs').appendChild(tabEl);
+
+  // Create page element
+  const pageEl = document.createElement('div');
+  pageEl.className = type === 'viewer' ? 'viewer-page page-view' : 'page-view';
+  pageEl.dataset.id = id;
+  document.getElementById('page-stack').appendChild(pageEl);
+
+  const tabData = { id, type, title: 'Nueva pestaña', tabEl, pageEl, history: [], historyIdx: -1, ...opts };
+  APP.tabs.push(tabData);
+  activateTab(id);
+
+  if (type === 'home') renderHome(tabData);
+  else if (type === 'results') renderResults(tabData);
+  else if (type === 'viewer') renderViewer(tabData);
+  else if (type === 'tool') renderTool(tabData);
+
+  return tabData;
+}
+
+function activateTab(id) {
+  APP.activeTab = id;
+  APP.tabs.forEach(t => {
+    t.tabEl.classList.toggle('active', t.id === id);
+    t.pageEl.classList.toggle('active', t.id === id);
+  });
+  const tab = getTab(id);
+  if (tab) {
+    updateAddressBar(tab);
+    updateNavBtns(tab);
+  }
+}
+
+function closeTab(id, e) {
+  e && e.stopPropagation();
+  const idx = APP.tabs.findIndex(t => t.id === id);
+  if (idx === -1) return;
+  const tab = APP.tabs[idx];
+  tab.tabEl.remove();
+  tab.pageEl.remove();
+  APP.tabs.splice(idx, 1);
+  if (APP.tabs.length === 0) newTab('home');
+  else {
+    const next = APP.tabs[Math.min(idx, APP.tabs.length-1)];
+    activateTab(next.id);
+  }
+}
+
+function getTab(id) { return APP.tabs.find(t => t.id === id); }
+function getActiveTab() { return getTab(APP.activeTab); }
+
+function setTabTitle(tab, title, favicon='') {
+  tab.title = title;
+  tab.tabEl.querySelector('.btab-title').textContent = title.substring(0, 25);
+  const fav = tab.tabEl.querySelector('.btab-favicon');
+  if (favicon) { fav.src = favicon; fav.style.display = 'block'; }
+}
+
+function updateAddressBar(tab) {
+  const inp = document.getElementById('omni-input');
+  if (tab.type === 'home') inp.value = '';
+  else if (tab.type === 'results') inp.value = tab.query || '';
+  else if (tab.type === 'viewer') inp.value = tab.url || '';
+  else if (tab.type === 'tool') inp.value = tab.tool || '';
+}
+
+function updateNavBtns(tab) {
+  document.getElementById('btn-back').disabled = !tab || tab.historyIdx <= 0;
+  document.getElementById('btn-fwd').disabled = !tab || tab.historyIdx >= tab.history.length - 1;
+}
+
+/* ─── Navigation ─── */
+function goBack() {
+  const tab = getActiveTab();
+  if (!tab || tab.historyIdx <= 0) return;
+  tab.historyIdx--;
+  const h = tab.history[tab.historyIdx];
+  navigateTo(h, tab, false);
+}
+function goFwd() {
+  const tab = getActiveTab();
+  if (!tab || tab.historyIdx >= tab.history.length - 1) return;
+  tab.historyIdx++;
+  const h = tab.history[tab.historyIdx];
+  navigateTo(h, tab, false);
+}
+function reload() {
+  const tab = getActiveTab();
+  if (!tab) return;
+  if (tab.type === 'viewer') {
+    const iframe = tab.pageEl.querySelector('.viewer-iframe');
+    if (iframe) iframe.src = iframe.src;
+  } else {
+    if (tab.type === 'results') renderResults(tab);
+    else if (tab.type === 'tool') renderTool(tab);
+  }
+}
+
+function pushHistory(tab, entry) {
+  tab.history = tab.history.slice(0, tab.historyIdx + 1);
+  tab.history.push(entry);
+  tab.historyIdx = tab.history.length - 1;
+  updateNavBtns(tab);
+}
+
+function navigateTo(entry, tab, addToHistory=true) {
+  if (!tab) tab = getActiveTab();
+  if (!tab) return;
+
+  tab.type = entry.type;
+  if (entry.query) tab.query = entry.query;
+  if (entry.url) tab.url = entry.url;
+  if (entry.tool) tab.tool = entry.tool;
+
+  if (addToHistory) pushHistory(tab, entry);
+  updateAddressBar(tab);
+
+  if (entry.type === 'home') renderHome(tab);
+  else if (entry.type === 'results') renderResults(tab);
+  else if (entry.type === 'viewer') renderViewer(tab);
+  else if (entry.type === 'tool') renderTool(tab);
+}
+
+/* ─── Omnibar ─── */
+function omniSearch() {
+  const q = document.getElementById('omni-input').value.trim();
+  if (!q) return;
+  const tab = getActiveTab();
+  if (!tab) return;
+  const isUrl = /^https?:\/\//.test(q) || /^www\./.test(q);
+  if (isUrl) {
+    const url = q.startsWith('http') ? q : 'https://'+q;
+    tab.url = url; tab.type = 'viewer';
+    navigateTo({type:'viewer', url}, tab);
+  } else {
+    tab.query = q; tab.type = 'results';
+    navigateTo({type:'results', query:q}, tab);
+  }
+}
+
+function clearOmni() {
+  document.getElementById('omni-input').value = '';
+  document.getElementById('omni-clear').style.display = 'none';
+  document.getElementById('omni-input').focus();
+}
+
+/* Open a link inside MOX (new tab) */
+function openLink(url, title, tabId) {
+  const tab = newTab('viewer', { url, title: title || url });
+  pushHistory(tab, { type: 'viewer', url });
+  setTabTitle(tab, title || url, `https://www.google.com/s2/favicons?domain=${new URL(url).hostname}&sz=16`);
+}
+
+/* Search in current tab */
+function doSearch(q, tabId) {
+  let tab = tabId ? getTab(tabId) : getActiveTab();
+  if (!tab) tab = getActiveTab();
+  if (!q) return;
+  tab.query = q; tab.type = 'results';
+  navigateTo({ type:'results', query:q }, tab);
+  document.getElementById('omni-input').value = q;
+}
+
+/* ──────────────────────────────────────────────
+   HOME PAGE
+──────────────────────────────────────────────── */
+function renderHome(tab) {
+  tab.type = 'home';
+  setTabTitle(tab, 'MOX — Inicio');
+  tab.pageEl.className = 'page-view' + (tab.id === APP.activeTab ? ' active' : '');
+
+  const L = I18N[APP.lang] || I18N.es;
+  const chips = (L.chips || []).map(c =>
+    `<span class="chip" onclick="doSearch('${c.replace(/'/g,"\\'")}',${tab.id})">${c}</span>`
+  ).join('');
+
+  const toolDefs = [
+    {icon:'🧮', key:'calc'}, {icon:'🌤️', key:'weather'},
+    {icon:'💱', key:'currency'}, {icon:'🌐', key:'translate'},
+    {icon:'📰', key:'news'},
+  ];
+  const tools = toolDefs.map(td =>
+    `<div class="tool-tile" onclick="openTool('${td.key}',${tab.id})">
+      <div class="ti">${td.icon}</div>
+      <div class="tl">${T(td.key)}</div>
+    </div>`
+  ).join('');
+
+  tab.pageEl.innerHTML = `
+    <div id="home-page">
+      <div class="home-logo">MOX</div>
+      <div class="home-omni">
+        <span style="font-size:1.1rem;margin-right:10px;color:var(--text3)">🔍</span>
+        <input type="text" id="home-inp-${tab.id}" placeholder="${L.home_ph}" autocomplete="off" spellcheck="false"
+          onkeydown="if(event.key==='Enter') doSearch(this.value,${tab.id})">
+        <button class="home-search-btn" onclick="doSearch(document.getElementById('home-inp-${tab.id}').value,${tab.id})">Buscar</button>
+      </div>
+      <div class="home-chips">${chips}</div>
+      <div class="home-tools-grid">${tools}</div>
+    </div>`;
+}
+
+function openTool(key, tabId) {
+  let tab = getTab(tabId) || getActiveTab();
+  tab.tool = key; tab.type = 'tool';
+  navigateTo({ type:'tool', tool:key }, tab);
+}
+
+/* ──────────────────────────────────────────────
+   RESULTS PAGE
+──────────────────────────────────────────────── */
+async function renderResults(tab) {
+  const q = tab.query || '';
+  tab.type = 'results';
+  setTabTitle(tab, `${q} — MOX`);
+  tab.pageEl.className = 'page-view' + (tab.id === APP.activeTab ? ' active' : '');
+
+  const L = I18N[APP.lang] || I18N.es;
+  const filters = (L.filters || []).map((f,i) =>
+    `<span class="fpill${i===0?' on':''}" onclick="document.querySelectorAll('.fpill').forEach(p=>p.classList.remove('on'));this.classList.add('on')">${f}</span>`
+  ).join('');
+
+  tab.pageEl.innerHTML = `<div class="loading"><div class="spin"></div></div>`;
+
+  // Detect special intents
+  let specialHtml = '';
+
+  // Math
+  if (/^[\d\s\+\-\*\/\^\(\)\.%]+$/.test(q) && /[\+\-\*\/]/.test(q)) {
+    try {
+      const r = Function('"use strict";return (' + q.replace(/\^/g,'**') + ')')();
+      if (isFinite(r)) specialHtml += `<div class="answer-box">
+        <div class="ab-tag">🧮 Calculadora</div>
+        <div class="ab-body" style="font-size:1.7rem;font-weight:300">${q} = <b style="color:var(--acc)">${parseFloat(r.toFixed(10))}</b></div>
+      </div>`;
+    } catch(e) {}
+  }
+
+  // Weather
+  const wKw = ['clima','tiempo','temperatura','weather','météo','wetter','meteo','tempo'];
+  if (wKw.some(k => q.toLowerCase().includes(k))) {
+    const wh = await buildWeatherHtml(q);
+    if (wh) specialHtml += wh;
+  }
+
+  // Fetch DDG results
+  const { answerHtml, resultsHtml, infoHtml } = await fetchDDG(q, tab.id);
+
+  const newsHtml = await buildNewsHtml(q, tab.id);
+
+  tab.pageEl.innerHTML = `
+    <div class="results-page">
+      <div class="results-meta">${T('results_for')} <b>"${q}"</b></div>
+      <div class="filter-row">${filters}</div>
+      ${specialHtml}
+      ${answerHtml}
+      <div class="clearfix">
+        ${infoHtml}
+        ${resultsHtml}
+      </div>
+      ${newsHtml ? `<div style="margin-top:28px;padding-top:24px;border-top:1px solid var(--border)">
+        <div style="font-size:1rem;font-weight:500;margin-bottom:16px;color:var(--text2)">📰 ${T('news_hdr')}</div>
+        ${newsHtml}
+      </div>` : ''}
+    </div>`;
+
+  // Load favicons lazily
+  tab.pageEl.querySelectorAll('img[data-src]').forEach(img => {
+    const i = new Image();
+    i.onload = () => { img.src = img.dataset.src; delete img.dataset.src; };
+    i.onerror = () => { img.style.display = 'none'; };
+    i.src = img.dataset.src;
+  });
+}
+
+/* ─── DDG Fetch ─── */
+async function fetchDDG(q, tabId) {
+  let answerHtml = '', resultsHtml = '', infoHtml = '';
+  try {
+    const r = await fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(q)}&format=json&no_html=1&skip_disambig=1`);
+    const d = await r.json();
+
+    if (d.AbstractText && d.AbstractText.length > 40) {
+      const u = d.AbstractURL || '#';
+      answerHtml = `<div class="answer-box">
+        <div class="ab-tag">✦ ${T('answer')}</div>
+        <div class="ab-body">${hl(d.AbstractText.substring(0,500), q)}</div>
+        <div class="ab-src">${T('src')}: <a onclick="openLink('${u}','${(d.Heading||q).replace(/'/g,"\\'")}');return false;" href="#">${u.replace(/^https?:\/\//,'').split('/')[0]}</a></div>
+      </div>`;
+
+      if (d.Image) {
+        infoHtml = `<div class="info-float">
+          <img src="${d.Image}" alt="${d.Heading}" onerror="this.style.display='none'">
+          <div class="ib">
+            <div class="ib-title">${d.Heading}</div>
+            <div class="ib-desc">${d.AbstractText.substring(0,180)}...</div>
+            <a class="ib-link" onclick="openLink('${u}','${(d.Heading||q).replace(/'/g,"\\'")}');return false;" href="#">Ver más →</a>
+          </div>
+        </div>`;
+      }
+    }
+
+    let items = [];
+    if (d.RelatedTopics) d.RelatedTopics.forEach(t => {
+      if (t.Text && t.FirstURL) items.push({ url:t.FirstURL, title:t.Text.split(' - ')[0].substring(0,100), snippet:t.Text.substring(0,220) });
+      else if (t.Topics) t.Topics.forEach(s => { if (s.Text && s.FirstURL) items.push({ url:s.FirstURL, title:s.Text.substring(0,100), snippet:s.Text.substring(0,220) }); });
+    });
+    if (d.Results) d.Results.forEach(r => { if (r.FirstURL) items.push({ url:r.FirstURL, title:r.Text.substring(0,100), snippet:r.Text.substring(0,220) }); });
+
+    items = items.slice(0, 8);
+    if (items.length) resultsHtml = items.map((r,i) => resultCard(r.url, r.title, r.snippet, i, q, tabId)).join('');
+    else resultsHtml = buildFallbackResults(q, tabId);
+  } catch(e) {
+    resultsHtml = buildFallbackResults(q, tabId);
+  }
+  return { answerHtml, resultsHtml, infoHtml };
+}
+
+function resultCard(url, title, snippet, i, q, tabId) {
+  let domain = '', path = '';
+  try { const u = new URL(url); domain = u.hostname; path = u.pathname.replace(/\//g,' › ').substring(0,40); } catch(e) { domain = url; }
+  const su = url.replace(/'/g,"\\'");
+  const st = (title||'').replace(/'/g,"\\'");
+  return `<div class="result-item" style="animation-delay:${i*.04}s">
+    <div class="result-top">
+      <img class="rfav" data-src="https://www.google.com/s2/favicons?domain=${domain}&sz=16" alt="">
+      <span class="rdomain">${domain}</span>
+      ${path ? `<span class="rbread"> › ${path}</span>` : ''}
+    </div>
+    <div class="rtitle" onclick="openLink('${su}','${st}')">${hl(title, q)}</div>
+    <div class="rsnip">${hl(snippet, q)}</div>
+  </div>`;
+}
+
+/* Rich fallback with many diverse sources */
+function buildFallbackResults(q, tabId) {
+  const eq = encodeURIComponent(q);
+  const sources = [
+    // Encyclopedic
+    { url:`https://es.wikipedia.org/wiki/${encodeURIComponent(q.replace(/ /g,'_'))}`, title:`${q} — Wikipedia`, snippet:`Artículo enciclopédico completo sobre "${q}". Historia, descripción, referencias y datos verificados por expertos.` },
+    // Video
+    { url:`https://www.youtube.com/results?search_query=${eq}`, title:`${q} — YouTube`, snippet:`Miles de videos sobre "${q}". Tutoriales, documentales, reseñas y contenido en vivo de creadores de todo el mundo.` },
+    // Shopping
+    { url:`https://www.amazon.com.mx/s?k=${eq}`, title:`Comprar "${q}" — Amazon México`, snippet:`Encuentra productos relacionados con "${q}" en Amazon. Envío rápido, reseñas verificadas y los mejores precios.` },
+    // Shopping 2
+    { url:`https://www.mercadolibre.com.mx/jm/search?as_word=${eq}`, title:`"${q}" en MercadoLibre`, snippet:`Compra y vende artículos de "${q}" en MercadoLibre. Envíos a todo México, cuotas sin interés y garantía.` },
+    // Social Reddit
+    { url:`https://www.reddit.com/search/?q=${eq}&sort=relevance`, title:`Foros sobre ${q} — Reddit`, snippet:`Discusiones reales, opiniones, preguntas y experiencias de la comunidad global sobre "${q}". Miles de comentarios.` },
+    // Social Twitter/X
+    { url:`https://twitter.com/search?q=${eq}&f=live`, title:`${q} en tiempo real — Twitter/X`, snippet:`¿Qué dice la gente sobre "${q}" ahora mismo? Tuits recientes, tendencias y conversaciones en vivo.` },
+    // Social Instagram
+    { url:`https://www.instagram.com/explore/tags/${eq.replace(/%20/g,'')}/`, title:`#${q.replace(/ /g,'')} — Instagram`, snippet:`Explora las últimas publicaciones e historias sobre #${q.replace(/ /g,'')} en Instagram.` },
+    // Academic
+    { url:`https://scholar.google.com/scholar?q=${eq}`, title:`"${q}" — Google Scholar`, snippet:`Artículos científicos, tesis, libros y publicaciones académicas revisadas por pares sobre "${q}".` },
+    // GitHub (tech)
+    { url:`https://github.com/search?q=${eq}`, title:`"${q}" — GitHub`, snippet:`Proyectos de código abierto, repositorios, librerías y herramientas relacionadas con "${q}".` },
+    // News
+    { url:`https://news.google.com/search?q=${eq}&hl=${APP.lang}`, title:`Noticias sobre "${q}" — Google News`, snippet:`Las últimas noticias, artículos y reportajes sobre "${q}" de fuentes de todo el mundo.` },
+    // Quora
+    { url:`https://www.quora.com/search?q=${eq}`, title:`Preguntas sobre "${q}" — Quora`, snippet:`Expertos y usuarios de todo el mundo responden preguntas sobre "${q}" con perspectivas únicas.` },
+    // Pinterest
+    { url:`https://www.pinterest.com/search/pins/?q=${eq}`, title:`"${q}" — Pinterest`, snippet:`Inspírate con imágenes, ideas, proyectos y tableros relacionados con "${q}" en Pinterest.` },
+  ];
+  return sources.map((s,i) => resultCard(s.url, s.title, s.snippet, i, q, tabId)).join('');
+}
+
+/* ─── NEWS ─── */
+async function buildNewsHtml(q, tabId) {
+  try {
+    const feed = 'https://feeds.bbci.co.uk/mundo/rss.xml';
+    const r = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feed)}&count=6`);
+    const d = await r.json();
+    if (d.status === 'ok' && d.items?.length) {
+      return d.items.map((item, i) => {
+        const su = item.link.replace(/'/g,"\\'");
+        const st = item.title.replace(/'/g,"\\'");
+        const thumb = item.thumbnail || item.enclosure?.link || '';
+        const ago = timeAgo(item.pubDate);
+        return `<div class="news-item" style="animation-delay:${i*.04}s" onclick="openLink('${su}','${st}')">
+          <div class="ni-body">
+            <div class="ni-src"><b>BBC Mundo</b> · ${ago}</div>
+            <div class="ni-title">${hl(item.title, q)}</div>
+            <div class="ni-time">${item.pubDate ? new Date(item.pubDate).toLocaleDateString(APP.lang,{day:'numeric',month:'short',year:'numeric'}) : ''}</div>
+          </div>
+          ${thumb
+            ? `<img class="ni-img" src="${thumb}" alt="" onerror="this.outerHTML='<div class=\\'ni-img\\'>📰</div>'">`
+            : `<div class="ni-img">📰</div>`}
+        </div>`;
+      }).join('');
+    }
+    throw 0;
+  } catch(e) {
+    const titles = [`Todo sobre ${q}`,`Impacto de ${q} hoy`,`${q} en el mundo`,`Guía: ${q}`,`${q} — últimas novedades`,`Análisis: ${q}`];
+    const srcs = ['BBC Mundo','El Universal','Reuters','CNN','Expansión','Forbes'];
+    return titles.map((t,i) => `<div class="news-item" style="animation-delay:${i*.04}s">
+      <div class="ni-body"><div class="ni-src"><b>${srcs[i]}</b> · hace ${i+1}h</div><div class="ni-title">${t}</div></div>
+      <div class="ni-img">📰</div>
+    </div>`).join('');
+  }
+}
+
+/* ──────────────────────────────────────────────
+   VIEWER PAGE (load URL inside MOX)
+──────────────────────────────────────────────── */
+function renderViewer(tab) {
+  const url = tab.url || '';
+  let domain = '';
+  try { domain = new URL(url).hostname; } catch(e) { domain = url; }
+
+  tab.type = 'viewer';
+  setTabTitle(tab, domain || url, `https://www.google.com/s2/favicons?domain=${domain}&sz=16`);
+  tab.pageEl.className = 'viewer-page page-view' + (tab.id === APP.activeTab ? ' active' : '');
+
+  tab.pageEl.innerHTML = `
+    <div class="viewer-toolbar">
+      <span class="viewer-url">${url}</span>
+      <button class="vbtn" onclick="navigateTo({type:'results',query:getTab(${tab.id}).query||''},getTab(${tab.id}))">← Resultados</button>
+      <button class="vbtn primary" onclick="window.open('${url.replace(/'/g,"\\'")}','_blank')">Abrir externo ↗</button>
+    </div>
+    <iframe class="viewer-iframe" id="vif-${tab.id}" src="${url}"
+      onload="checkIframe(${tab.id})"
+      onerror="showBlocked(${tab.id},'${url.replace(/'/g,"\\'")}')">
+    </iframe>
+    <div class="viewer-blocked" id="vbl-${tab.id}">
+      <div class="vb-icon">🚫</div>
+      <p><b>${T('blocked_title')}</b><br>${T('blocked_desc')}</p>
+      <button class="vb-open" onclick="window.open('${url.replace(/'/g,"\\'")}','_blank')">${T('open_ext')}</button>
+    </div>`;
+
+  updateAddressBar(tab);
+
+  // Timeout to detect blocked iframes
+  setTimeout(() => {
+    try {
+      const iframe = document.getElementById(`vif-${tab.id}`);
+      if (!iframe) return;
+      const doc = iframe.contentDocument;
+      if (!doc || doc.body === null || doc.body.innerHTML.trim() === '') showBlocked(tab.id, url);
+    } catch(ex) { showBlocked(tab.id, url); }
+  }, 3500);
+}
+
+function checkIframe(tabId) {
+  try {
+    const iframe = document.getElementById(`vif-${tabId}`);
+    if (!iframe) return;
+    const doc = iframe.contentDocument;
+    if (!doc || !doc.body || doc.body.innerHTML.trim() === '') showBlocked(tabId);
+    else {
+      const title = doc.title;
+      const tab = getTab(tabId);
+      if (tab && title) setTabTitle(tab, title, `https://www.google.com/s2/favicons?domain=${tab.url?new URL(tab.url).hostname:''}&sz=16`);
+    }
+  } catch(ex) { showBlocked(tabId); }
+}
+
+function showBlocked(tabId, url) {
+  const iframe = document.getElementById(`vif-${tabId}`);
+  const blocked = document.getElementById(`vbl-${tabId}`);
+  if (iframe) iframe.style.display = 'none';
+  if (blocked) blocked.style.display = 'flex';
+}
+
+/* ──────────────────────────────────────────────
+   TOOL PAGES
+──────────────────────────────────────────────── */
+function renderTool(tab) {
+  const key = tab.tool;
+  tab.type = 'tool';
+  setTabTitle(tab, T(key) || key);
+  tab.pageEl.className = 'page-view' + (tab.id === APP.activeTab ? ' active' : '');
+  if (key === 'calc') renderCalc(tab);
+  else if (key === 'weather') renderWeather(tab);
+  else if (key === 'currency') renderCurrency(tab);
+  else if (key === 'translate') renderTranslate(tab);
+  else if (key === 'news') renderNewsTool(tab);
+}
+
+/* CALCULATOR */
+let cE = '';
+function renderCalc(tab) {
+  tab.pageEl.innerHTML = `<div class="results-page"><div class="results-meta">🧮 ${T('calc')}</div>
+    <div class="calc-wrap">
+      <div class="calc-disp">
+        <div class="calc-hist" id="ch"></div>
+        <div class="calc-num" id="cn">0</div>
+      </div>
+      <div class="cg">
+        <button class="cb fn" onclick="cFn('AC')">AC</button>
+        <button class="cb fn" onclick="cFn('+/-')">+/−</button>
+        <button class="cb fn" onclick="cFn('%')">%</button>
+        <button class="cb op" onclick="cIn('/')">÷</button>
+        <button class="cb" onclick="cIn('7')">7</button>
+        <button class="cb" onclick="cIn('8')">8</button>
+        <button class="cb" onclick="cIn('9')">9</button>
+        <button class="cb op" onclick="cIn('*')">×</button>
+        <button class="cb" onclick="cIn('4')">4</button>
+        <button class="cb" onclick="cIn('5')">5</button>
+        <button class="cb" onclick="cIn('6')">6</button>
+        <button class="cb op" onclick="cIn('-')">−</button>
+        <button class="cb" onclick="cIn('1')">1</button>
+        <button class="cb" onclick="cIn('2')">2</button>
+        <button class="cb" onclick="cIn('3')">3</button>
+        <button class="cb op" onclick="cIn('+')">+</button>
+        <button class="cb zero" onclick="cIn('0')">0</button>
+        <button class="cb" onclick="cIn('.')">.</button>
+        <button class="cb eq" onclick="cEq()">=</button>
+      </div>
+    </div></div>`;
+  cE = '';
+}
+function cIn(v) { cE += v; _cu(); }
+function cFn(f) { if(f==='AC'){cE='';document.getElementById('ch').textContent='';document.getElementById('cn').textContent='0';return;} if(f==='+/-'){cE=cE.startsWith('-')?cE.slice(1):'-'+cE;} if(f==='%'){try{cE=String(parseFloat(cE)/100);}catch(e){}} _cu(); }
+function _cu() { document.getElementById('ch').textContent=cE; try{const r=Function('"use strict";return('+cE+')')();if(isFinite(r))document.getElementById('cn').textContent=parseFloat(r.toFixed(10));}catch(e){} }
+function cEq() { try{const r=Function('"use strict";return('+cE+')')();if(isFinite(r)){const res=parseFloat(r.toFixed(10)).toString();document.getElementById('ch').textContent=cE+' =';document.getElementById('cn').textContent=res;cE=res;}}catch(e){document.getElementById('cn').textContent='Error';} }
+
+/* WEATHER */
+async function renderWeather(tab) {
+  tab.pageEl.innerHTML = `<div class="results-page"><div class="results-meta">🌤️ ${T('weather')}</div><div class="loading"><div class="spin"></div></div></div>`;
+  const q = tab.query || 'Mexico City';
+  const wh = await buildWeatherHtml(q);
+  tab.pageEl.innerHTML = `<div class="results-page"><div class="results-meta">🌤️ ${T('weather')}</div>
+    ${wh || `<div class="empty-state"><div style="font-size:2.5rem">🌍</div><p>Escribe una ciudad en la barra de búsqueda<br>Ejemplo: <b>clima Madrid</b></p></div>`}
+  </div>`;
+}
+
+async function buildWeatherHtml(rawQ) {
+  try {
+    const geoQ = rawQ.replace(/clima|tiempo|temperatura|weather|météo|wetter|meteo|tempo/gi,'').trim() || rawQ;
+    const gr = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(geoQ)}&format=json&limit=1&accept-language=${APP.lang}`);
+    const gd = await gr.json();
+    if (!gd?.length) throw 0;
+    const { lat, lon, display_name } = gd[0];
+    const city = display_name.split(',')[0];
+    const wr = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&hourly=relativehumidity_2m,apparent_temperature,windspeed_10m&timezone=auto&forecast_days=1`);
+    const wd = await wr.json();
+    const cw = wd.current_weather;
+    const temp = Math.round(cw.temperature);
+    const wind = Math.round(cw.windspeed);
+    const code = cw.weathercode;
+    const hi = wd.hourly.time.findIndex(t => t.startsWith(new Date().toISOString().slice(0,13)));
+    const hum = hi>=0 ? (wd.hourly.relativehumidity_2m[hi]??'—') : '—';
+    const feels = hi>=0 ? Math.round(wd.hourly.apparent_temperature[hi]) : temp;
+    return `<div class="weather-card">
+      <div class="wc-city">📍 ${city}</div>
+      <div class="wc-main">
+        <div><div class="wc-temp">${temp}°C</div><div class="wc-desc">${wDesc(code)}</div></div>
+        <div class="wc-right"><div class="wc-icon">${wIcon(code)}</div></div>
+      </div>
+      <div class="wc-grid">
+        <div class="wc-item"><div class="wl">${T('humidity')}</div><div class="wv">${hum}%</div></div>
+        <div class="wc-item"><div class="wl">${T('wind')}</div><div class="wv">${wind} km/h</div></div>
+        <div class="wc-item"><div class="wl">${T('feels')}</div><div class="wv">${feels}°C</div></div>
+      </div>
+    </div>`;
+  } catch(e) { return null; }
+}
+function wIcon(c){if(c===0)return'☀️';if(c<=2)return'⛅';if(c===3)return'☁️';if(c<=49)return'🌫️';if(c<=59)return'🌦️';if(c<=69)return'🌧️';if(c<=79)return'❄️';return'⛈️';}
+function wDesc(c){const m={0:'Despejado',1:'Mayormente despejado',2:'Parcialmente nublado',3:'Nublado',45:'Niebla',51:'Llovizna',61:'Lluvia leve',63:'Lluvia moderada',65:'Lluvia intensa',71:'Nieve leve',80:'Chubascos',95:'Tormenta'};const ks=Object.keys(m).map(Number).sort((a,b)=>b-a);for(const k of ks)if(c>=k)return m[k];return'Variable';}
+
+/* CURRENCY */
+function renderCurrency(tab) {
+  const opts = [['USD','🇺🇸 USD'],['EUR','🇪🇺 EUR'],['MXN','🇲🇽 MXN'],['GBP','🇬🇧 GBP'],['JPY','🇯🇵 JPY'],['CAD','🇨🇦 CAD'],['AUD','🇦🇺 AUD'],['CHF','🇨🇭 CHF'],['CNY','🇨🇳 CNY'],['BRL','🇧🇷 BRL'],['ARS','🇦🇷 ARS'],['COP','🇨🇴 COP'],['CLP','🇨🇱 CLP'],['INR','🇮🇳 INR'],['KRW','🇰🇷 KRW'],['SEK','🇸🇪 SEK'],['NOK','🇳🇴 NOK'],['SGD','🇸🇬 SGD'],['HKD','🇭🇰 HKD'],['THB','🇹🇭 THB']].map(([c,n])=>`<option value="${c}">${n}</option>`).join('');
+  tab.pageEl.innerHTML = `<div class="results-page">
+    <div class="results-meta">💱 ${T('currency')}</div>
+    <div class="cur-card">
+      <div class="cur-row">
+        <input class="cur-num" type="number" id="ca" value="1" min="0" step="any">
+        <select class="cur-sel" id="cf">${opts.replace('value="USD"','value="USD" selected')}</select>
+        <button class="cur-sw" onclick="swCur()">⇄</button>
+        <select class="cur-sel" id="ct">${opts.replace('value="MXN"','value="MXN" selected')}</select>
+        <button class="cur-go" onclick="doCur()">${T('convert')}</button>
+      </div>
+      <div class="cur-res"><div class="cur-res-main" id="cr">—</div><div class="cur-res-rate" id="crr"></div></div>
+    </div>
+  </div>`;
+  doCur();
+}
+async function doCur(){
+  const a=parseFloat(document.getElementById('ca').value)||1,f=document.getElementById('cf').value,t=document.getElementById('ct').value;
+  document.getElementById('cr').textContent='...';
+  try{const r=await fetch(`https://api.frankfurter.app/latest?from=${f}&to=${t}`);const d=await r.json();const rt=d.rates[t];document.getElementById('cr').textContent=`${a.toLocaleString(APP.lang)} ${f} = ${(a*rt).toLocaleString(APP.lang,{minimumFractionDigits:2,maximumFractionDigits:4})} ${t}`;document.getElementById('crr').textContent=`1 ${f} = ${rt} ${t} · European Central Bank`;}catch(e){document.getElementById('cr').textContent='Error al obtener tasas.';}
+}
+function swCur(){const f=document.getElementById('cf').value,t=document.getElementById('ct').value;document.getElementById('cf').value=t;document.getElementById('ct').value=f;doCur();}
+
+/* TRANSLATOR */
+const TLANGS=[['af','Afrikáans'],['sq','Albanés'],['de','Alemán'],['ar','Árabe'],['bg','Búlgaro'],['ca','Catalán'],['cs','Checo'],['zh','Chino'],['ko','Coreano'],['hr','Croata'],['da','Danés'],['sk','Eslovaco'],['es','Español'],['et','Estonio'],['fi','Finlandés'],['fr','Francés'],['el','Griego'],['he','Hebreo'],['hi','Hindi'],['hu','Húngaro'],['id','Indonesio'],['en','Inglés'],['ga','Irlandés'],['it','Italiano'],['ja','Japonés'],['lv','Letón'],['lt','Lituano'],['ms','Malayo'],['nl','Neerlandés'],['ne','Nepalés'],['no','Noruego'],['fa','Persa'],['pl','Polaco'],['pt','Portugués'],['ro','Rumano'],['ru','Ruso'],['sr','Serbio'],['sv','Sueco'],['sw','Suajili'],['tl','Tagalo'],['ta','Tamil'],['th','Tailandés'],['tr','Turco'],['uk','Ucraniano'],['ur','Urdu'],['vi','Vietnamita']];
+function renderTranslate(tab) {
+  const opts = TLANGS.map(([c,n])=>`<option value="${c}">${n}</option>`).join('');
+  tab.pageEl.innerHTML = `<div class="results-page">
+    <div class="results-meta">🌐 ${T('translate')}</div>
+    <div class="trans-card">
+      <div class="trans-header">
+        <select class="ts" id="tlf">${opts.replace('value="es"','value="es" selected')}</select>
+        <button class="tsw" onclick="swTrans()">⇄</button>
+        <select class="ts" id="tlt">${opts.replace('value="en"','value="en" selected')}</select>
+      </div>
+      <div class="trans-body">
+        <div class="tp"><textarea id="tli" placeholder="Escribe texto para traducir..." rows="4">${tab.query||''}</textarea></div>
+        <div class="tp"><div class="tp-out ph" id="tlo">La traducción aparecerá aquí...</div></div>
+      </div>
+      <div class="trans-foot"><button class="trans-btn" onclick="doTrans()">${T('translate_btn')} →</button></div>
+    </div>
+  </div>`;
+  if (tab.query) doTrans();
+}
+async function doTrans(){
+  const text=document.getElementById('tli').value.trim(),f=document.getElementById('tlf').value,t=document.getElementById('tlt').value;
+  if(!text)return;
+  const out=document.getElementById('tlo');
+  out.className='tp-out ph';out.textContent='Traduciendo...';
+  try{const r=await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${f}|${t}`);const d=await r.json();if(d.responseStatus===200&&d.responseData?.translatedText){out.className='tp-out';out.textContent=d.responseData.translatedText;}else throw 0;}catch(e){out.className='tp-out ph';out.textContent='Error al traducir. Verifica la conexión.';}
+}
+function swTrans(){const f=document.getElementById('tlf').value,t=document.getElementById('tlt').value,i=document.getElementById('tli').value,o=document.getElementById('tlo').textContent;document.getElementById('tlf').value=t;document.getElementById('tlt').value=f;document.getElementById('tli').value=o;document.getElementById('tlo').textContent=i;}
+
+/* NEWS TOOL */
+async function renderNewsTool(tab) {
+  tab.pageEl.innerHTML = `<div class="results-page"><div class="results-meta">📰 ${T('news')}</div><div class="loading"><div class="spin"></div></div></div>`;
+  const nHtml = await buildNewsHtml('', tab.id);
+  tab.pageEl.innerHTML = `<div class="results-page"><div class="results-meta">📰 ${T('news')}</div>${nHtml}</div>`;
+}
+
+/* ─── UTILS ─── */
+function hl(text, q) {
+  if (!text || !q) return text || '';
+  (q.split(' ').filter(w=>w.length>2)).forEach(w => {
+    text = text.replace(new RegExp('('+w.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'), '<mark>$1</mark>');
+  });
+  return text;
+}
+function timeAgo(s) {
+  try { const h=Math.floor((Date.now()-new Date(s).getTime())/3600000); if(h<1)return'<1h'; if(h<24)return h+'h'; return Math.floor(h/24)+'d'; } catch(e){ return ''; }
+}
+
+/* ─── KEYBOARD ─── */
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey||e.metaKey) && e.key==='k') { e.preventDefault(); document.getElementById('omni-input').focus(); document.getElementById('omni-input').select(); }
+  if ((e.ctrlKey||e.metaKey) && e.key==='t') { e.preventDefault(); newTab('home'); }
+  if ((e.ctrlKey||e.metaKey) && e.key==='w') { e.preventDefault(); const t=getActiveTab(); if(t) closeTab(t.id); }
+  if (e.key==='Escape') closeModal();
+});
+document.getElementById('omni-input').addEventListener('keydown', e => { if(e.key==='Enter') omniSearch(); });
+document.getElementById('omni-input').addEventListener('input', function() { document.getElementById('omni-clear').style.display = this.value ? 'block' : 'none'; });
+
+/* ─── INIT ─── */
+const savedTheme = localStorage.getItem('mox-theme');
+if (savedTheme) {
+  const [base, mode] = savedTheme.split('-');
+  APP.themeBase = base; APP.themeMode = mode || 'dark';
+  applyTheme();
+  document.querySelectorAll('.th-block').forEach(bl => {
+    bl.classList.toggle('sel', bl.dataset.base === base);
+    bl.querySelectorAll('.mpill').forEach(p => p.classList.toggle('on', p.dataset.m === (mode||'dark')));
+  });
+}
+
+// Start with one home tab
+newTab('home');
+
+// Keyboard shortcuts hint
+console.log('MOX Shortcuts: Ctrl+K = focus search | Ctrl+T = new tab | Ctrl+W = close tab');
+</script>
+</body>
+</html>
